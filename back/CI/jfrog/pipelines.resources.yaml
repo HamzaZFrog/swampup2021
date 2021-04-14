@@ -16,28 +16,28 @@ resources:
   - name: back_appBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app_gradle_pipeline
       buildNumber: ${run_number}
   
   - name: build_info_back_app_promoted_staging
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app_gradle_pipeline
       buildNumber: '${run_number}'
   
   - name: build_info_back_app_promoted_prod
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app_gradle_pipeline
       buildNumber: '${run_number}'
 
   - name: back_app_exec
     type: FileSpec
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       pattern: 'app-gradle-rc-local/*/webservice-*.war'
       #pattern: 'app-gradle-rc-local/org/jfrog/example/gradle/webservice/1.1.2/webservice-1.1.2.war'
       buildName: back_app-docker
@@ -48,20 +48,20 @@ resources:
   - name: build_info_docker_backapp
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app-docker
       buildNumber: '${run_number}'
 
   - name: build_info_docker_backapp_scanned
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app-docker
       buildNumber: '${run_number}'
 
   - name: build_info_docker_backapp_promoted_staging
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: ArtifactoryUnified
       buildName: back_app-docker
       buildNumber: '${run_number}'
