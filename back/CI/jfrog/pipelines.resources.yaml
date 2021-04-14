@@ -10,7 +10,7 @@ resources:
       gitProvider: hza_github
       path: HamzaZFrog/swampup2021
       branches:
-        include: master
+        include: main
 
   # Build info for the published gradle App
   - name: back_appBuildInfo
