@@ -13,8 +13,10 @@ pipelines:
                 tag: master
           gradleCommand:  clean artifactoryPublish -b build.gradle
           sourceLocation:       back/src  #required
-          configFileLocation:   .  #required
-          configFileName:       gradle-art-config  #required
+          #configFileLocation:   .  #required
+          #configFileName:       gradle-art-config  #required
+          resolverRepo: app-gradle-virtual
+          deployerRepo: app-gradle-virtual
           forceXrayScan:        false #optional
           autoPublishBuildInfo: true #optional
           inputResources:
