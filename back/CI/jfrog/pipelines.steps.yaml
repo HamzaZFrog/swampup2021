@@ -21,6 +21,7 @@ pipelines:
             - name: src_code_back_app
           integrations:
             - name: artifactory
+          affinityGroup: together
         execution:
           onStart:
             - echo  "Preparing for work..."
@@ -38,6 +39,7 @@ pipelines:
       - name: publish_backend_buildinfo
         type: PublishBuildInfo
         configuration:
+          affinityGroup: together
           inputSteps:
             - name: build_app_gradle_backend
           outputResources:
