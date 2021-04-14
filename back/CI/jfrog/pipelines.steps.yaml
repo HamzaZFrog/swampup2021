@@ -19,9 +19,10 @@ pipelines:
           autoPublishBuildInfo: true #optional
           inputResources:
             - name: src_code_back_app
+          outputResources:
+            - name: back_appBuildInfo
           integrations:
             - name: artifactory
-          affinityGroup: together
         execution:
           onStart:
             - echo  "Preparing for work..."
