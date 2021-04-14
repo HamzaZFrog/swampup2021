@@ -24,7 +24,7 @@ pipelines:
           outputResources:
             - name: back_appBuildInfo
           integrations:
-            - name: artifactory
+            - name: ArtifactoryUnified
         execution:
           onStart:
             - echo  "Preparing for work..."
