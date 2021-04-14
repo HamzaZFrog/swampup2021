@@ -1,0 +1,53 @@
+pipelines:
+  - name: suv_115_back_app_gradle_pipeline
+
+    steps:
+      - name: build_app_gradle_backend
+        type: GradleBuild
+        configuration: 
+          runtime:
+            type: image
+            image:
+              custom:
+                name: drydock/u18java
+                tag: master
+          gradleCommand:  clean artifactoryPublish -b build.gradle
+          sourceLocation:       back/src  #required
+          configFileLocation:   .  #required
+          configFileName:       gradle-art-config  #required
+          forceXrayScan:        false #optional
+          autoPublishBuildInfo: false #optional
+          inputResources:
+            - name: src_code_back_app
+          integrations:
+            - name: artifactory
+        execution:
+          onStart:
+            - echo  "Preparing for work..."
+          onSuccess:
+            - echo ${res_src_code_back_app_isGitTag}
+            - appVersion=`if [[ ${res_src_code_back_app_isGitTag} == "True" ]]; then echo ${res_src_code_back_app_gitTagName}; else echo ${res_src_code_back_app_commitSha}; fi`
+            - echo $appVersion
+            - add_pipeline_variables appVersion="${appVersion}"
+            - add_pipeline_variables subPath="${res_src_code_back_app_branchName}/${appVersion}"      
+          onFailure:
+            - echo "You Lose"
+          onComplete: #always
+            - echo "Leave it as you found it. Let's clean it"
+
+      - name: publish_backend_buildinfo
+        type: PublishBuildInfo
+        configuration:
+          inputSteps:
+            - name: build_app_gradle_backend
+          outputResources:
+            - name: back_appBuildInfo
+        execution:
+          onStart:
+            - echo "Preparing for Xray scan..."
+          onSuccess:
+            - echo build name / build number ${res_back_appBuildInfo_buildName} ${res_back_appBuildInfo_buildNumber}
+          onFailure:
+            - echo "uh oh, something went wrong"
+          onComplete: #always
+            - echo "Cleaning up some stuff"

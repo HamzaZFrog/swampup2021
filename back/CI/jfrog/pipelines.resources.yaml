@@ -1,0 +1,67 @@
+resources:
+
+# gradle PIPELINE
+  - name: src_code_back_app
+    type: GitRepo
+    configuration:
+      files:
+        include: ^back\/.+
+        exclude: ^back\/CI\/.+
+      gitProvider: hza_github
+      path: HamzaZFrog/swampup2021
+      branches:
+        include: master
+
+  # Build info for the published gradle App
+  - name: back_appBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app_gradle_pipeline
+      buildNumber: ${run_number}
+  
+  - name: build_info_back_app_promoted_staging
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app_gradle_pipeline
+      buildNumber: '${run_number}'
+  
+  - name: build_info_back_app_promoted_prod
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app_gradle_pipeline
+      buildNumber: '${run_number}'
+
+  - name: back_app_exec
+    type: FileSpec
+    configuration:
+      sourceArtifactory: artifactory
+      pattern: 'app-gradle-rc-local/*/webservice-*.war'
+      #pattern: 'app-gradle-rc-local/org/jfrog/example/gradle/webservice/1.1.2/webservice-1.1.2.war'
+      buildName: back_app-docker
+      buildNumber: '${run_number}'
+      target: war/webservice.war
+      flat: true
+
+  - name: build_info_docker_backapp
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app-docker
+      buildNumber: '${run_number}'
+
+  - name: build_info_docker_backapp_scanned
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app-docker
+      buildNumber: '${run_number}'
+
+  - name: build_info_docker_backapp_promoted_staging
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: back_app-docker
+      buildNumber: '${run_number}'
