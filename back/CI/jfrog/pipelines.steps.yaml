@@ -16,7 +16,7 @@ pipelines:
           configFileLocation:   .  #required
           configFileName:       gradle-art-config  #required
           forceXrayScan:        false #optional
-          autoPublishBuildInfo: false #optional
+          autoPublishBuildInfo: true #optional
           inputResources:
             - name: src_code_back_app
           integrations:
@@ -35,21 +35,3 @@ pipelines:
             - echo "You Lose"
           onComplete: #always
             - echo "Leave it as you found it. Let's clean it"
-
-      - name: publish_backend_buildinfo
-        type: PublishBuildInfo
-        configuration:
-          affinityGroup: together
-          inputSteps:
-            - name: build_app_gradle_backend
-          outputResources:
-            - name: back_appBuildInfo
-        execution:
-          onStart:
-            - echo "Preparing for Xray scan..."
-          onSuccess:
-            - echo build name / build number ${res_back_appBuildInfo_buildName} ${res_back_appBuildInfo_buildNumber}
-          onFailure:
-            - echo "uh oh, something went wrong"
-          onComplete: #always
-            - echo "Cleaning up some stuff"
