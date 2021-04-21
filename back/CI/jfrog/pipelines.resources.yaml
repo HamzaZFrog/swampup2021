@@ -1,6 +1,6 @@
 resources:
 
-# gradle PIPELINE
+# GRADLE PIPELINE
   - name: src_code_back_app
     type: GitRepo
     configuration:
@@ -11,6 +11,18 @@ resources:
       path: HamzaZFrog/swampup2021
       branches:
         include: main
+
+# DOCKER PIPELINE
+  - name: src_dockerfile_back_app
+    type: GitRepo
+    configuration:
+      files:
+        include: ^back\/CI\/Docker\/.+
+      gitProvider: hza_github
+      path: HamzaZFrog/swampup2021
+      branches:
+        include: main
+     
 
   # Build info for the published gradle App
   - name: back_appBuildInfo

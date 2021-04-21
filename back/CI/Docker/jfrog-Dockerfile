@@ -1,7 +1,8 @@
-FROM registry/app-docker-virtual/jfrog-docker-framework:latest
+FROM registry/app-docker-virtual/tomcat:8.0-alpine
 
-RUN rm -rf /home/exec/apache-tomcat-8.0.32/webapps/*
+ADD war/*.war /usr/local/tomcat/webapps/
 
-ADD war/*.war /home/exec/apache-tomcat-8.0.32/webapps/ROOT.war
+EXPOSE 8080
 
-CMD /bin/bash -c cd /home/exec; /home/exec/apache-tomcat-8.0.32/bin/catalina.sh run
+CMD [“catalina.sh”, “run”]
+

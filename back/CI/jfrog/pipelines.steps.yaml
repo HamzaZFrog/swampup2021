@@ -39,3 +39,60 @@ pipelines:
             - echo "You Lose"
           onComplete: #always
             - echo "Leave it as you found it. Let's clean it"
+
+
+    steps:
+      - name: build_docker_backapp
+        type: DockerBuild
+        configuration:
+          affinityGroup: swampup
+          dockerFileName: jfrog-Dockerfile
+          dockerFileLocation: back/CI/Docker/
+          dockerImageName: '${ArtIP}/app-docker-virtual/backapp'
+          dockerImageTag: '${res_build_info_back_app_promoted_staging_myversion}-${res_src_dockerfile_back_app_commitSha}'
+          inputResources:
+            - name: src_dockerfile_back_app
+            - name: back_appBuildInfo
+            - name: back_app_exec
+          integrations:
+            - name: ArtifactoryUnified
+            - name: app_docker_registry
+        execution:
+          onStart:
+            - 'export ArtIP=$(echo ${int_ArtifactoryUnified_url}|awk -F ''/'' ''{print $3}'')'
+            - echo ${res_build_info_back_app_promoted_staging_myversion}
+            - add_pipeline_variables appVersion="${res_build_info_back_app_promoted_staging_myversion}"
+            - echo $triggerBuildInfoName
+            - echo $triggerBuildInfoNumber
+            - add_pipeline_variables triggerBuildInfoName="${res_build_info_back_app_promoted_staging_buildName}"
+            - add_pipeline_variables triggerBuildInfoNumber="${res_build_info_back_app_promoted_staging_buildNumber}"
+            - echo $triggerBuildInfoName
+            - echo $triggerBuildInfoNumber
+            #- echo "items.find({\"@build.name\":\"${triggerBuildInfoName}\",\"@build.number\":\"${triggerBuildInfoNumber}\"}).include(\"@app.version\")" > aql.json
+            #- cat aql.json
+            #- jfrog rt curl -XPOST api/search/aql -T aql.json
+            #- appVersion=`jfrog rt curl -XPOST api/search/aql -T aql.json | jq --raw-output .results[].properties[].value`
+            #- echo $appVersion
+            #- add_pipeline_variables appVersion="${appVersion}" 
+            - echo ${appVersion}
+            - echo $triggerBuildInfoName
+            - echo ${triggerBuildInfoNumber}
+            #####################################
+            - echo ${res_back_app_exec_resourcePath}
+            - echo "Gradle App Build number :" 
+            - echo ${triggerBuildInfoNumber}
+            - echo "Webservice App version :" 
+            - echo ${appVersion} 
+            - echo "Git repo hash :" 
+            - echo ${res_src_dockerfile_back_app_commitSha}
+            - echo "Copying exec binary to specific location..." && ls -l
+            - echo "Filespec location :" && echo ${res_back_app_exec_resourcePath} && ls -l ${res_back_app_exec_resourcePath}
+            #- cp ${res_back_app_exec_resourcePath}/back* ${res_src_dockerfile_back_app_resourcePath}/back/CI/Docker/
+            #- cd ${res_src_dockerfile_back_app_resourcePath}/back/CI/Docker/
+            #- tar xvf back*.tgz
+            #- ls -l ${res_src_dockerfile_back_app_resourcePath}/back/CI/Docker
+            - echo $appVersion
+            - sed -i "s/registry/${ArtIP}/g" ${res_src_dockerfile_back_app_resourcePath}/back/CI/Docker/jfrog-Dockerfile
+            - add_pipeline_variables myDockerTag="${appVersion}-${res_src_dockerfile_back_app_commitSha}"
+          onSuccess:
+            - echo "Job well done!"
