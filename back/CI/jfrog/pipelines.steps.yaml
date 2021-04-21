@@ -59,7 +59,7 @@ pipelines:
           onStart:
             - 'export ArtIP=$(echo ${int_ArtifactoryUnified_url}|awk -F ''/'' ''{print $3}'')'
             - echo ${res_build_info_back_app_promoted_staging_myversion}
-            - add_pipeline_variables appVersion="${res_build_info_back_app_promoted_staging_myversion}"
+            - add_pipeline_variables appVersion="1.0"
             - echo $triggerBuildInfoName
             - echo $triggerBuildInfoNumber
             - add_pipeline_variables triggerBuildInfoName="${res_build_info_back_app_promoted_staging_buildName}"
