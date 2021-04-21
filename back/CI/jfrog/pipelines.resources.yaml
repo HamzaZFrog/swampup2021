@@ -51,8 +51,6 @@ resources:
     configuration:
       sourceArtifactory: ArtifactoryUnified
       pattern: app-gradle-dev-local/**/webservice-*.war
-      buildName: back_app-docker
-      buildNumber: '${run_number}'
       target: war/webservice.war
       flat: true
       sortBy:
