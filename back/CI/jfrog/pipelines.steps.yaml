@@ -40,8 +40,6 @@ pipelines:
           onComplete: #always
             - echo "Leave it as you found it. Let's clean it"
 
-
-    steps:
       - name: build_docker_backapp
         type: DockerBuild
         configuration:
