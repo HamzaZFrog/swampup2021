@@ -1,5 +1,7 @@
 pipelines:
   - name: suv_115_back_app_gradle_pipeline
+    configuration:
+      nodePool: MyDynamicGCPNode
     steps:
       - name: build_app_gradle_backend
         type: GradleBuild
