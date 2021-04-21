@@ -50,7 +50,7 @@ resources:
     type: FileSpec
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      pattern: 'app-gradle-rc-local/*/webservice-*.war'
+      pattern: 'app-gradle-dev-local/*/webservice-*.war'
       #pattern: 'app-gradle-rc-local/org/jfrog/example/gradle/webservice/1.1.2/webservice-1.1.2.war'
       buildName: back_app-docker
       buildNumber: '${run_number}'
