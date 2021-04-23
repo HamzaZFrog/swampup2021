@@ -6,6 +6,9 @@ pipelines:
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 
+          environmentVariables:
+            JFROG_CLI_BUILD_NAME:    back_app_gradle_pipeline
+            env2:     value2
           runtime:
             type: image
             image:
@@ -43,6 +46,8 @@ pipelines:
       - name: build_docker_backapp
         type: DockerBuild
         configuration:
+          environmentVariables:
+            JFROG_CLI_BUILD_NAME:    back_app_docker_pipeline
           affinityGroup: swampup
           dockerFileName: jfrog-Dockerfile
           dockerFileLocation: back/CI/Docker/
@@ -94,3 +99,24 @@ pipelines:
             - add_pipeline_variables myDockerTag="${appVersion}-${res_src_dockerfile_back_app_commitSha}"
           onSuccess:
             - echo "Job well done!"
+
+    - name: publish_docker_backapp
+        type: DockerPush
+        configuration:
+          environmentVariables:
+            JFROG_CLI_BUILD_NAME:    back_app_docker_pipeline
+          affinityGroup: swampup
+          targetRepository: app-docker-virtual
+          autoPublishBuildInfo: true
+          inputSteps:
+            - name: build_docker_backapp
+          integrations:
+            - name: ArtifactoryUnified
+          outputResources:
+            - name: build_info_docker_backapp
+        execution:
+          #onStart: 
+            #- jfrog rt dl app-gradle-rc-local/org/jfrog/example/gradle/webservice/1.1.2/webservice-1.1.2.war --build-name="suv_003_backapp_docker_pipeline" --build-number=${run_number}
+          onSuccess:
+            - echo "Job well done!"
+            - echo $appVersion
