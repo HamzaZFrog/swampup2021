@@ -100,7 +100,7 @@ pipelines:
           onSuccess:
             - echo "Job well done!"
 
-    - name: publish_docker_backapp
+      - name: publish_docker_backapp
         type: DockerPush
         configuration:
           environmentVariables:
