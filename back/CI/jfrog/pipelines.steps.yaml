@@ -4,7 +4,7 @@ pipelines:
       nodePool: k8s-pool
       environmentVariables:
         readOnly:
-          application_id :     my-hza-app
+          application_id : my-hza-app-{{gitBranch}}
     steps:
       - name: conf_init
         type: Bash
@@ -15,7 +15,7 @@ pipelines:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            - echo 'Applying repository configuration'
+            - echo 'Applying repository configuration for branch {{gitBranch}}'
             - sed "s/application/${application_id}/g" ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf-template.yaml > ${application_id}-repo-conf.yaml
             - cat ${application_id}-repo-conf.yaml
             - jfrog rt curl -XPATCH /api/system/configuration -T ./${application_id}-repo-conf.yaml
@@ -50,7 +50,7 @@ pipelines:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            - echo  "Preparing for work..."
+            - echo  "Preparing for work... {{gitBranch}}"
           onSuccess:
             - echo ${res_src_code_back_app_isGitTag}
             - appVersion=`if [[ ${res_src_code_back_app_isGitTag} == "True" ]]; then echo ${res_src_code_back_app_gitTagName}; else echo ${res_src_code_back_app_commitSha}; fi`
