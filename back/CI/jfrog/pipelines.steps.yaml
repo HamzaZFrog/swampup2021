@@ -6,7 +6,7 @@ pipelines:
         readOnly:
           application_id :     myapp
     steps:
-      _ name: conf_init
+      - name: conf_init
         type: Bash
         configuration:
           inputResources:
