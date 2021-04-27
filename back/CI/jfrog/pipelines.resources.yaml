@@ -31,21 +31,21 @@ resources:
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app_gradle_pipeline
+      buildName: back_app_gradle_{{gitBranch}}
       buildNumber: ${run_number}
   
   - name: build_info_back_app_promoted_staging
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app_gradle_pipeline
+      buildName: back_app_gradle_{{gitBranch}}
       buildNumber: '${run_number}'
   
   - name: build_info_back_app_promoted_prod
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app_gradle_pipeline
+      buildName: back_app_{{gitBranch}}
       buildNumber: '${run_number}'
 
   - name: back_app_exec
@@ -63,19 +63,19 @@ resources:
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app-docker
+      buildName: back_app_docker_{{gitBranch}}
       buildNumber: '${run_number}'
 
   - name: build_info_docker_backapp_scanned
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app-docker
+      buildName: back_app_docker_{{gitBranch}}
       buildNumber: '${run_number}'
 
   - name: build_info_docker_backapp_promoted_staging
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      buildName: back_app-docker
+      buildName: back_app_docker_{{gitBranch}}
       buildNumber: '${run_number}'
