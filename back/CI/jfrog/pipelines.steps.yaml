@@ -1,7 +1,6 @@
 pipelines:
   - name: suv_115_back_app_gradle_pipeline
     configuration:
-      nodePool: k8s-pool
       environmentVariables:
         readOnly:
           application_id : my-hza-app-{{gitBranch}}
