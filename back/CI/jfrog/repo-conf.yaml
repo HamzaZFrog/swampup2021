@@ -71,7 +71,7 @@ virtualRepositories:
         - application-gradle-dev-local
         - application-gradle-rc-local
         - application-gradle-prod-local
-        - application-jcenter
+        - application-gradle-remote
       description: "gradle virtual repositories"
       defaultDeploymentRepo: application-gradle-dev-local
   application-docker-virtual:
