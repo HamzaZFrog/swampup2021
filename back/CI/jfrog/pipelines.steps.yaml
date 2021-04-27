@@ -16,6 +16,7 @@ pipelines:
         execution:
           onStart:
             - echo 'Applying repository configuration'
+            - echo $application_id
             - echo ${res_src_code_back_app_resourcePath}
             - cd ${res_src_code_back_app_resourcePath}/back/CI/jfrog
             - echo "Copying exec binary to specific location..." && ls -l
