@@ -19,8 +19,8 @@ pipelines:
             - echo ${res_src_code_back_app_resourcePath}
             - cd ${res_src_code_back_app_resourcePath}
             - echo "Copying exec binary to specific location..." && ls -l
-            - sed -i "s/${application_id}/application/g" ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
-            - cat ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
+            - sed "s/${application_id}/application/g" ./back/CI/jfrog/repo-conf.yaml > app-repo-conf.yaml
+            - cat app-repo-conf.yaml
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 
