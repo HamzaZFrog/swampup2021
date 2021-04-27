@@ -1,7 +1,7 @@
 resources:
 
 # GRADLE PIPELINE
-  - name: src_code_back_app
+  - name: src_code_back_app_hza
     type: GitRepo
     configuration:
       files:
@@ -15,7 +15,7 @@ resources:
         commit: true
 
 # DOCKER PIPELINE
-  - name: src_dockerfile_back_app
+  - name: src_dockerfile_back_app_hza
     type: GitRepo
     configuration:
       files:
@@ -27,28 +27,28 @@ resources:
      
 
   # Build info for the published gradle App
-  - name: back_appBuildInfo
+  - name: back_appBuildInfo_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_gradle_{{gitBranch}}
       buildNumber: ${run_number}
   
-  - name: build_info_back_app_promoted_staging
+  - name: build_info_back_app_promoted_staging_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_gradle_{{gitBranch}}
       buildNumber: '${run_number}'
   
-  - name: build_info_back_app_promoted_prod
+  - name: build_info_back_app_promoted_prod_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_{{gitBranch}}
       buildNumber: '${run_number}'
 
-  - name: back_app_exec
+  - name: back_app_exec_hza
     type: FileSpec
     configuration:
       sourceArtifactory: ArtifactoryUnified
@@ -59,21 +59,21 @@ resources:
         - created
       limit: 1
 
-  - name: build_info_docker_backapp
+  - name: build_info_docker_backapp_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_docker_{{gitBranch}}
       buildNumber: '${run_number}'
 
-  - name: build_info_docker_backapp_scanned
+  - name: build_info_docker_backapp_scanned_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_docker_{{gitBranch}}
       buildNumber: '${run_number}'
 
-  - name: build_info_docker_backapp_promoted_staging
+  - name: build_info_docker_backapp_promoted_staging_hza
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
