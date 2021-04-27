@@ -16,9 +16,6 @@ pipelines:
         execution:
           onStart:
             - echo 'Applying repository configuration'
-            - echo ${res_src_code_back_app_resourcePath}
-            #- cd ${res_src_code_back_app_resourcePath}/back/CI/jfrog
-            #- echo "Copying exec binary to specific location..." && ls -l
             - sed "s/application/${application_id}/g" ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf-template.yaml > ${application_id}-repo-conf.yaml
             - cat ${application_id}-repo-conf.yaml
             - jfrog rt curl -XPATCH /api/system/configuration -T ./${application_id}-repo-conf.yaml
