@@ -23,6 +23,7 @@ pipelines:
             - sed "s/application/${application_id}/g" repo-conf.yaml > app-repo-conf.yaml
             - cat app-repo-conf.yaml
             - jfrog rt curl -XPATCH /api/system/configuration -T ./app-repo-conf.yaml
+      
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 
@@ -39,10 +40,12 @@ pipelines:
           sourceLocation:       back/src  #required
           #configFileLocation:   .  #required
           #configFileName:       gradle-art-config  #required
-          resolverRepo: app-gradle-virtual
-          deployerRepo: app-gradle-virtual
+          resolverRepo: ${application_id}-gradle-virtual
+          deployerRepo: ${application_id}-gradle-virtual
           forceXrayScan:        false #optional
           autoPublishBuildInfo: true #optional
+          inputSteps: 
+            - name: conf_init
           inputResources:
             - name: src_code_back_app
           outputResources:
@@ -71,7 +74,7 @@ pipelines:
           affinityGroup: swampup
           dockerFileName: jfrog-Dockerfile
           dockerFileLocation: back/CI/Docker/
-          dockerImageName: '${ArtIP}/app-docker-virtual/backapp'
+          dockerImageName: '${ArtIP}/${application_id}-docker-virtual/backapp'
           dockerImageTag: '${run_number}-${res_src_dockerfile_back_app_commitSha}'
           inputResources:
             - name: src_dockerfile_back_app
@@ -126,7 +129,7 @@ pipelines:
           environmentVariables:
             JFROG_CLI_BUILD_NAME:    back_app_docker_pipeline
           affinityGroup: swampup
-          targetRepository: app-docker-virtual
+          targetRepository: ${application_id}-docker-virtual
           autoPublishBuildInfo: true
           inputSteps:
             - name: build_docker_backapp
