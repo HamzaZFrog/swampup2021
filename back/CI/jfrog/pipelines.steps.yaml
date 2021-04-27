@@ -4,7 +4,7 @@ pipelines:
       nodePool: k8s-pool
       environmentVariables:
         readOnly:
-          application_id :     myapp
+          application_id :     my-hza-app
     steps:
       - name: conf_init
         type: Bash
@@ -22,6 +22,7 @@ pipelines:
             - echo "Copying exec binary to specific location..." && ls -l
             - sed "s/application/${application_id}/g" repo-conf.yaml > app-repo-conf.yaml
             - cat app-repo-conf.yaml
+            - jfrog rt curl -XPATCH /api/system/configuration -T ./repo-creation.yaml
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 
