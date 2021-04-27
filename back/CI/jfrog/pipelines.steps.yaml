@@ -66,7 +66,7 @@ pipelines:
         type: DockerBuild
         configuration:
           environmentVariables:
-            JFROG_CLI_BUILD_NAME:    back_app_docker_pipeline
+            JFROG_CLI_BUILD_NAME:    ${application_id}_back_app_docker_pipeline
           affinityGroup: swampup
           dockerFileName: jfrog-Dockerfile
           dockerFileLocation: back/CI/Docker/
@@ -123,7 +123,7 @@ pipelines:
         type: DockerPush
         configuration:
           environmentVariables:
-            JFROG_CLI_BUILD_NAME:    back_app_docker_pipeline
+            JFROG_CLI_BUILD_NAME:    ${application_id}_back_app_docker_pipeline
           affinityGroup: swampup
           targetRepository: ${application_id}-docker-virtual
           autoPublishBuildInfo: true

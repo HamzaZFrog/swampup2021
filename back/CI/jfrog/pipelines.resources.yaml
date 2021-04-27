@@ -52,7 +52,7 @@ resources:
     type: FileSpec
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      pattern: app-gradle-dev-local/**/webservice-*.war
+      pattern: ${application_id}-gradle-dev-local/**/webservice-*.war
       target: war/webservice.war
       flat: true
       sortBy:
