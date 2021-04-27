@@ -16,9 +16,8 @@ pipelines:
         execution:
           onStart:
             - echo 'Applying repository configuration'
-            - sed -i "s/${application_id}/application/g" ${res_src_dockerfile_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
-            - cat ${res_src_dockerfile_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
-
+            - sed -i "s/${application_id}/application/g" ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
+            - cat ${res_src_code_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 
