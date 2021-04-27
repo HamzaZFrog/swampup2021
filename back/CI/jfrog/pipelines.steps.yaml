@@ -2,7 +2,23 @@ pipelines:
   - name: suv_115_back_app_gradle_pipeline
     configuration:
       nodePool: k8s-pool
+      environmentVariables:
+        readOnly:
+          application_id :     myapp
     steps:
+      _ name: conf_init
+        type: Bash
+        configuration:
+          inputResources:
+            - name: src_code_back_app
+          integrations:
+            - name: ArtifactoryUnified
+        execution:
+          onStart:
+            - echo 'Applying repository configuration'
+            - sed -i "s/${application_id}/application/g" ${res_src_dockerfile_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
+            - cat ${res_src_dockerfile_back_app_resourcePath}/back/CI/jfrog/repo-conf.yaml
+
       - name: build_app_gradle_backend
         type: GradleBuild
         configuration: 

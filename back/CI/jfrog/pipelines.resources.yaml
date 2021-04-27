@@ -11,6 +11,8 @@ resources:
       path: HamzaZFrog/swampup2021
       branches:
         include: main
+      buildOn:
+        commit: true
 
 # DOCKER PIPELINE
   - name: src_dockerfile_back_app
