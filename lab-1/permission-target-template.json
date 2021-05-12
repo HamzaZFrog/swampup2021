@@ -1,0 +1,1 @@
+{"name":"${app}-dev-permission-target","repo":{"repositories":"${app}-gradle-dev-local,${app}-docker-local,${app}-helm-dev-local","include-patterns":"**","actions-groups":{"app-dev-group":"read"}}}
