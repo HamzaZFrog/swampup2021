@@ -19,10 +19,10 @@
 export SCRIPT_DIR=$(pwd)
 
 # admin user
-export ADMIN_USER=XXXXX
+export ADMIN_USER=hamza
 
 # admin password
-export ADMIN_PASSWORD=XXXXXX
+export ADMIN_PASSWORD=JFrog0601
 
 #save artifactory url
 export JFROG_PLATFORM=swampup115.jfrog.io
@@ -33,19 +33,19 @@ export JFROG_EDGE_OREGON=edge115oregon.jfrog.io
 export APP_ID=myApp
 
 # Increment it everytime you run your lab
-export APP_VERSION=1.1.20
+export APP_VERSION=1.1.35
 
 # Increment it everytime you run your lab
-export BUILD_NUMBER=9
+export BUILD_NUMBER=16
 
 # This will be used later on when tagging our docker image
 export IMAGE_TAG=$BUILD_NUMBER
 
 # Create an internal admin group
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/admin-group -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/init/admin_group.json
+#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/admin-group -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/init/admin_group.json
 
-# Create an admin bearer token
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -XPOST https://$JFROG_PLATFORM/artifactory/api/security/token -d "token_type=Bearer" -d "expires_in=3600" -d "username=$ADMIN_USER" -d "refreshable=true" -d "scope=member-of-groups:admin-group"
+# Service Admin Token
+
 
 # Instanciate token
 export token="Put your token here"
@@ -86,6 +86,9 @@ $SCRIPT_DIR/lab-1/sharing-repositories.sh
 # After sharing the repository with the given project, set the env level (dev, prod)
 #TODO (Optional)
 
+# Adding builds to the Xray indexing process
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/binMgr/builds -T $SCRIPT_DIR/xray/indexed-builds.json
+
 ##############
 ## 2nd Lab
 ##############
@@ -109,6 +112,8 @@ jfrog rt gradle "clean artifactoryPublish -b build.gradle --info --refresh-depen
 
 # build info
 jfrog rt bp gradle-su-115 $BUILD_NUMBER
+
+jfrog rt bs gradle-su-115 $BUILD_NUMBER
 
 # Searching build artifacts
 jfrog rt s "app-gradle-virtual/" --build=gradle-su-115/$BUILD_NUMBER
@@ -198,10 +203,34 @@ jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-prod-local --status=released --c
 # tagging the promoted helm chart 
 jfrog rt sp "app-helm-prod-local/*" "maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION" --build=helm-su-115/$BUILD_NUMBER
 
-#security 
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/module4/security-policy.json
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/module4/license-policy.json
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v2/watches -T $SCRIPT_DIR/module4/watch.json
+#Security
+# Trigger an Xray scan of your docker build
+jfrog rt bs docker-su-115 $BUILD_NUMBER
+
+# What did you get as a result?
+#[Info] Triggered Xray build scan... The scan may take a few minutes.
+#[Info] Xray scan completed.
+# {
+  #"summary": {
+    #"total_alerts": 0,
+    #"fail_build": false,
+    #"message": "No Xray “Fail build in case of a violation” policy rule has been defined on this build. The Xray scan will run in parallel to the deployment of the build and will not obstruct the build. To review the Xray scan results, see the Xray Violations tab in the UI.",
+    #"more_details_url": ""
+  #},
+  #"alerts": [],
+  #"licenses": []
+#}
+
+# it's the right time to create your security policies and watches
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/xray/security-policy.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/xray/license-policy.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v2/watches -T $SCRIPT_DIR/xray/watch.json
+
+# Let's run the build scan again
+jfrog rt bs docker-su-115 $BUILD_NUMBER
+
+# Let's run it once again without enforcement
+jfrog rt bs docker-su-115 $BUILD_NUMBER --fail=false
 
 # Distribution 
 
@@ -220,9 +249,6 @@ jfrog rt rbs $APP_ID $APP_VERSION
 
 # Add release bundle to Project
 # DO IT manually (no API for that)
-
-# Release bundle Xray Scanning
-# TO DO : Check with ecosystem team when RB scanning with CLI will be released (this is a short term roadmap item)
 
 #need to create target repositories for distribution on edge
 #create all with yaml configuration file
