@@ -132,6 +132,7 @@ pipelines:
             - name: ArtifactoryUnified
           outputResources:
             - name: build_info_docker_backapp_hza
+            - name: suv_115_docker_resource
         execution:
           #onStart: 
             #- jfrog rt dl app-gradle-rc-local/org/jfrog/example/gradle/webservice/1.1.2/webservice-1.1.2.war --build-name="suv_003_backapp_docker_pipeline" --build-number=${run_number}
@@ -144,6 +145,9 @@ pipelines:
         configuration:
           environmentVariables: 
             version: ${run_number}
+            JFROG_CLI_BUILD_NAME: ${application_id}_back_app_helm_pipeline
+          autoPublishBuildInfo: true
+          affinityGroup: swampup
           inputResources:
             - name: build_info_docker_backapp_hza
             - name: src_code_back_app_hza

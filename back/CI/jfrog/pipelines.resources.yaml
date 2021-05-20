@@ -86,7 +86,7 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       repository: ${application_id}-helm-virtual
       chart: docker-app-chart
-      version: "0.1.${run_number}"
+      version: '0.1.${run_number}'
 
   - name: build_info_helm_backapp
     type: BuildInfo
@@ -101,3 +101,12 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_helm_{{gitBranch}}
       buildNumber: '${run_number}'
+
+  - name: suv_115_docker_resource
+    type: Image
+    configuration:
+      registry: ArtifactoryUnified                                # <-- replace with your artifactory integration
+      sourceRepository: ${application_id}-docker-virtual          # <-- required if registry is Artifactory
+      imageName: ${int_ArtifactoryUnified_url}/${application_id}-docker-virtual/jfrog-docker-app    # < -- replace with your image path and name
+      imageTag: '${run_number}'
+      autoPull: false
