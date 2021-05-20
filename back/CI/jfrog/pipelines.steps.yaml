@@ -69,8 +69,8 @@ pipelines:
           affinityGroup: swampup
           dockerFileName: jfrog-Dockerfile
           dockerFileLocation: back/CI/Docker/
-          dockerImageName: '${ArtIP}/${application_id}-docker-virtual/backapp'
-          dockerImageTag: '${run_number}-${res_src_dockerfile_back_app_hza_commitSha}'
+          dockerImageName: '${ArtIP}/${application_id}-docker-virtual/jfrog-docker-app'
+          dockerImageTag: '${run_number}'
           inputResources:
             - name: src_dockerfile_back_app_hza
             - name: back_appBuildInfo_hza
@@ -149,7 +149,7 @@ pipelines:
           autoPublishBuildInfo: true
           affinityGroup: swampup
           inputResources:
-            - name: build_info_docker_backapp_hza
+            - name: suv_115_docker_resource
             - name: src_code_back_app_hza
           outputResources:
             - name: suv_115_helm_chart_resource
