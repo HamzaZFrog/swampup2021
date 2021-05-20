@@ -84,7 +84,7 @@ resources:
     type: HelmChart
     configuration:
       sourceArtifactory: ArtifactoryUnified
-      repository: ${application_id}-app-helm-virtual
+      repository: ${application_id}-helm-virtual
       chart: docker-app-chart
       version: "0.1.${run_number}"
 

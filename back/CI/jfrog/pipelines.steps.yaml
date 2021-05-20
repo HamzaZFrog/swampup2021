@@ -149,6 +149,7 @@ pipelines:
             - name: src_code_back_app_hza
           outputResources:
             - name: suv_115_helm_chart_resource
+            - name: build_info_helm_backapp
           chartPath: back/CI/docker-app-chart
         execution:
           onStart:
