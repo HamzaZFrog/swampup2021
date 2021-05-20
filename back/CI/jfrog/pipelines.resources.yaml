@@ -95,7 +95,7 @@ resources:
       buildName: back_app_helm_{{gitBranch}}
       buildNumber: '${run_number}'
 
-   - name: build_info_helm_backapp_promoted_prod
+  - name: build_info_helm_backapp_promoted_prod
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryUnified
