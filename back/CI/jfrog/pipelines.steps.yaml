@@ -152,7 +152,7 @@ pipelines:
           chartPath: back/CI/docker-app-chart
         execution:
           onStart:
-             #- cd ${res_src_code_back_app_hza_resourcePath}/back/CI/docker-app-chart/
+             - cd ${res_src_code_back_app_hza_resourcePath}/back/CI/docker-app-chart/
              - ls -la
              - echo ${front_docker_registry}
              - echo ${front_docker_image}
