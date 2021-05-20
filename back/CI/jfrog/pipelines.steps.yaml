@@ -138,3 +138,33 @@ pipelines:
           onSuccess:
             - echo "Job well done!"
             - echo $appVersion
+
+      - name: build_helm_backapp_hza
+        type: HelmPublish
+        configuration:
+          environmentVariables: 
+            version: ${run_number}
+          inputResources:
+            - name: build_info_docker_backapp_hza
+            - name: src_code_back_app_hza
+          outputResources:
+            - name: suv_115_helm_chart_resource
+          chartPath: back/CI/docker-app-chart
+        execution:
+          onStart:
+             #- cd ${res_src_code_back_app_hza_resourcePath}/back/CI/docker-app-chart/
+             - ls -la
+             - echo ${front_docker_registry}
+             - echo ${front_docker_image}
+             - echo ${front_docker_tag}
+             - sed -ie 's/0.1.1/0.1.'"$run_number"'/' Chart.yaml
+             - sed -ie 's/latest/'"$run_number"'/g' values.yaml
+             - sed -i "s#FRONT_DOCKER_REGISTRY#${front_docker_registry}#g" values.yaml
+             - sed -i "s#FRONT_DOCKER_IMAGE#${front_docker_image}#g" values.yaml
+             - sed -i "s#FRONT_DOCKER_TAG#${front_docker_tag}#g" values.yaml
+             - sed -i "s#BACK_DOCKER_REGISTRY#${back_docker_registry}#g" values.yaml
+             - sed -i "s#BACK_DOCKER_IMAGE#${back_docker_image}#g" values.yaml
+             - sed -i "s#BACK_DOCKER_TAG#${back_docker_tag}#g" values.yaml
+             - cat Chart.yaml
+             - cat values.yaml
+
