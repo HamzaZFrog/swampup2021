@@ -107,8 +107,6 @@ cd $SCRIPT_DIR/back/src
 jfrog rt gradlec --use-wrapper=true --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --server-id-deploy=swampup115
 
 # Changing permissions on the gradle-wrapper
-chmod +x gradlew
-
 gradle wrapper --gradle-version 6.8.3 --distribution-type all
 
 # run build
