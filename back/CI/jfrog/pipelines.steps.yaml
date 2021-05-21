@@ -221,7 +221,7 @@ pipelines:
             - name: suv_115_deploy_helm_chart_sit
           inputResources:
              - name: build_info_docker_backapp_hza
-              trigger: false
+               trigger: false
           outputResources:
             - name: build_info_docker_backapp_promoted_prod_hza
         execution:
