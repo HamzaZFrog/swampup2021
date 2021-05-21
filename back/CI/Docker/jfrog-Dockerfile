@@ -1,4 +1,4 @@
-FROM registry/app-docker-virtual/tomcat:8.0-alpine
+FROM registry/tomcat:8.0-alpine
 
 ADD war/*.war /usr/local/tomcat/webapps/
 

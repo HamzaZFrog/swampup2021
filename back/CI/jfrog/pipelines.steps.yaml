@@ -113,7 +113,7 @@ pipelines:
             #- tar xvf back*.tgz
             #- ls -l ${res_src_dockerfile_back_app_resourcePath}/back/CI/Docker
             - echo $appVersion
-            - sed -i "s/registry/${ArtIP}/g" ${res_src_dockerfile_back_app_hza_resourcePath}/back/CI/Docker/jfrog-Dockerfile
+            - sed -i "s/registry/${ArtIP}\/${application_id}-docker-virtual/g" ${res_src_dockerfile_back_app_hza_resourcePath}/back/CI/Docker/jfrog-Dockerfile
             - add_pipeline_variables myDockerTag="${appVersion}-${res_src_dockerfile_back_app_hza_commitSha}"
           onSuccess:
             - echo "Job well done!"
@@ -197,8 +197,8 @@ pipelines:
           inputSteps:
             - name: suv_115_deploy_helm_chart_sit
           inputResources:
-             - name: build_info_helm_backapp
-               trigger: false
+            - name: build_info_helm_backapp
+              trigger: false
           outputResources:
             - name: build_info_helm_backapp_promoted_prod
         execution:
