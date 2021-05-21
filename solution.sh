@@ -104,7 +104,12 @@ cd $SCRIPT_DIR/back/src
 
 # Configure cli for gradle
 # Todo disable ivy descriptors
-jfrog rt gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --server-id-deploy=swampup115
+jfrog rt gradlec --use-wrapper=true --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --server-id-deploy=swampup115
+
+# Changing permissions on the gradle-wrapper
+chmod +x gradlew
+
+gradle wrapper --gradle-version 6.8.3 --distribution-type all
 
 # run build
 # during the build, explain why it is important to refresh dependencies and more globally to avoid dependency caching on the client side 
@@ -140,7 +145,7 @@ jfrog rt s "app-gradle-virtual/*" --props="stage=staging" --build=gradle-su-115/
 # Updating dockerfile with JFrog Platform URL
 cd $SCRIPT_DIR/back/CI/Docker
 
-sed "s/registry/${JFROG_PLATFORM}/g" jfrog-Dockerfile > Dockerfile
+sed "s/registry/${JFROG_PLATFORM}\/app-docker-virtual/g" jfrog-Dockerfile > Dockerfile
 
 # Reading the docker file and identifying the base image
 # TODO
