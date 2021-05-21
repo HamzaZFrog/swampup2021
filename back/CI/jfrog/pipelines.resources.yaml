@@ -101,6 +101,13 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       buildName: back_app_helm_{{gitBranch}}
       buildNumber: '${run_number}'
+  
+  - name: build_info_docker_backapp_promoted_prod_hza
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: back_app_docker_{{gitBranch}}
+      buildNumber: '${run_number}'
 
   - name: suv_115_docker_resource
     type: Image

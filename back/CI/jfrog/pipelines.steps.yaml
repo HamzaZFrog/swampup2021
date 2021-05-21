@@ -197,13 +197,35 @@ pipelines:
           inputSteps:
             - name: suv_115_deploy_helm_chart_sit
           inputResources:
-            - name: suv_115_helm_chart_resource
-            - name: build_info_helm_backapp
-              trigger: true
+             - name: build_info_helm_backapp
+              trigger: false
           outputResources:
             - name: build_info_helm_backapp_promoted_prod
         execution:
           onStart:
             - echo ${res_build_info_back_app_promoted_staging_buildName}
             - echo ${res_build_info_back_app_promoted_staging_buildNumber}
-            #- jfrog rt cp --build=${res_build_info_back_app_promoted_staging_buildName}/${res_build_info_back_app_promoted_staging_buildNumber} app-gradle-rc-local/ app-gradle-release-local/      
+            #- jfrog rt cp --build=${res_build_info_back_app_promoted_staging_buildName}/${res_build_info_back_app_promoted_staging_buildNumber} app-gradle-rc-local/ app-gradle-release-local/  
+
+      - name: promoting_docker_backapp_prod
+        type: PromoteBuild
+        configuration:
+          targetRepository: ${application_id}-docker-prod-local
+          includeDependencies: false
+          status: "released"
+          comment: "Docker image successfully tested in SIT"
+          copy: true
+          integrations:
+            - name: ArtifactoryUnified
+          inputSteps:
+            - name: suv_115_deploy_helm_chart_sit
+          inputResources:
+             - name: build_info_docker_backapp_hza
+              trigger: false
+          outputResources:
+            - name: build_info_docker_backapp_promoted_prod_hza
+        execution:
+          onStart:
+            - echo ${res_build_info_back_app_promoted_staging_buildName}
+            - echo ${res_build_info_back_app_promoted_staging_buildNumber}
+            #- jfrog rt cp --build=${res_build_info_back_app_promoted_staging_buildName}/${res_build_info_back_app_promoted_staging_buildNumber} app-gradle-rc-local/ app-gradle-release-local/   
