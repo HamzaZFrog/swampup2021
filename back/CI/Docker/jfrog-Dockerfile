@@ -1,4 +1,4 @@
-FROM registry/tomcat:8.0-alpine
+FROM registry/bitnami/tomcat:latest
 
 ADD war/*.war /usr/local/tomcat/webapps/
 

@@ -150,7 +150,7 @@ sed "s/registry/${JFROG_PLATFORM}\/app-docker-virtual/g" jfrog-Dockerfile > Dock
 
 # Pull fhe base image >> TO DO Change the base image in the CLI command
 # temporary workaround : the base image is statically pulled via the JFrog CLI
-jfrog rt dpl ${JFROG_PLATFORM}/app-docker-virtual/tomcat:8.0-alpine app-docker-virtual --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=app
+jfrog rt dpl ${JFROG_PLATFORM}/app-docker-virtual/bitnami/tomcat:latest app-docker-virtual --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=app
 
 # Download war file dependency
 jfrog rt dl --spec $SCRIPT_DIR/lab-2/latest-webservice.json --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=java-app
