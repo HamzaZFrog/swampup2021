@@ -15,47 +15,8 @@
 ###############################################
 #keep your git directory in memory for latest command
 
-# current location
-export SCRIPT_DIR=$(pwd)
-
-# admin user
-export ADMIN_USER=hamza
-
-# admin password
-export ADMIN_PASSWORD=JFrog0601
-
-#save artifactory url
-export JFROG_PLATFORM=swampup115.jfrog.io
-export JFROG_EDGE_SINGAPORE=edge115singapore.jfrog.io
-export JFROG_EDGE_OREGON=edge115oregon.jfrog.io
-
-# App name
-export APP_ID=myApp
-
-# Increment it everytime you run your lab
-export APP_VERSION=1.1.35
-
-# Increment it everytime you run your lab
-export BUILD_NUMBER=16
-
-# This will be used later on when tagging our docker image
-export IMAGE_TAG=$BUILD_NUMBER
-
-# Create an internal admin group
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/admin-group -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/init/admin_group.json
-
-# Service Admin Token
-
-
-# Instanciate token
-export token="Put your token here"
-
-# Create project
-curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' https://$JFROG_PLATFORM/access/api/v1/projects -T ./lab-1/su115-project.json
-
-#"errors" : [ {    "code" : "UNAUTHORIZED",    "message" : "Bearer authentication failed, invalid token"
-# Issue >> the token has admin permissions and still not working
-# Workaround : generate the bearer token manually via the UI (Security>Access token>generate a token)
+# load environment variables
+source .env
 
 # Instanciate token
 export token="Put your token here"
@@ -64,27 +25,15 @@ export token="Put your token here"
 ## 1st Lab
 ##############
 
-# OPTIONAL : delete default permissions target
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE https://$JFROG_PLATFORM/artifactory/api/v2/security/permissions/Anything
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE https://$JFROG_PLATFORM/artifactory/api/v2/security/permissions/Any%20Remote
-
 #create all with yaml configuration file
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_PLATFORM/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-main.yaml
 
-#create backend-dev, front-end dev, framework maintainer and release groups
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/developers-project-115 -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/lab-1/group.json
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/contributors-project-115 -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/lab-1/group.json
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/viewers-project-115 -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/lab-1/group.json
-#curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT https://$JFROG_PLATFORM/artifactory/api/security/groups/release-managers-project-115 -H "content-type: application/vnd.org.jfrog.artifactory.security.Group+json" -T $SCRIPT_DIR/lab-1/group.json
+# Create project
+curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' https://$JFROG_PLATFORM/access/api/v1/projects -T ./lab-1/su115-project.json
 
 # Sharing repositories in a project
 # !! Pre-requisite : install yq and jq !!
 $SCRIPT_DIR/lab-1/sharing-repositories.sh
-
-##### Works only with the bearer token generated via UI
-
-# After sharing the repository with the given project, set the env level (dev, prod)
-#TODO (Optional)
 
 # Adding builds to the Xray indexing process
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/binMgr/builds -T $SCRIPT_DIR/xray/indexed-builds.json
@@ -125,7 +74,7 @@ jfrog rt s "app-gradle-virtual/" --build=gradle-su-115/$BUILD_NUMBER
 jfrog rt s "app-gradle-virtual/" --build=gradle-su-115
 
 # tagging the build with properties
-jfrog rt sp "app-gradle-virtual/*" "maintainer=hza" --build=gradle-su-115/$BUILD_NUMBER
+jfrog rt sp "app-gradle-virtual/*" "maintainer=hza;stage=dev;appnmv=$APP_ID/$APP_VERSION" --build=gradle-su-115/$BUILD_NUMBER
 
 # Find the webservice.war from the latest build (using filespec)
 jfrog rt s --spec $SCRIPT_DIR/lab-2/latest-webservice.json
@@ -133,8 +82,11 @@ jfrog rt s --spec $SCRIPT_DIR/lab-2/latest-webservice.json
 # Find the webservice.war from the latest build (using CLI search pattern)
 jfrog rt s 'app-gradle-virtual/*/webservice*.war' --build=gradle-su-115
 
+# Find the gradle build dependencies
+jfrog rt s --spec="${SCRIPT_DIR}/lab-2/filespec-aql-dependency-search-gradle.json" --spec-vars="build-name=gradle-su-115;build-number=$BUILD_NUMBER"
+
 #Test run and promote ?
-jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-rc-local --status=staged --comment='webservice is now release candidate' --copy=true --props="maintainer=hza;stage=staging"
+jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-rc-local --status='release candidate' --comment='webservice is now release candidate' --copy=true --props="maintainer=hza;stage=staging"
 
 # Find all files from that build that were promoted to staging
 jfrog rt s "app-gradle-virtual/*" --props="stage=staging" --build=gradle-su-115/$BUILD_NUMBER
@@ -153,7 +105,7 @@ sed "s/registry/${JFROG_PLATFORM}\/app-docker-virtual/g" jfrog-Dockerfile > Dock
 jfrog rt dpl ${JFROG_PLATFORM}/app-docker-virtual/bitnami/tomcat:latest app-docker-virtual --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=app
 
 # Download war file dependency
-jfrog rt dl --spec $SCRIPT_DIR/lab-2/latest-webservice.json --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=java-app
+jfrog rt dl "app-gradle-virtual/*/webservice*.war" --props="stage=staging" --build=gradle-su-115/$BUILD_NUMBER --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=java-app
 
 # Run docker build
 docker build . -t $JFROG_PLATFORM/app-docker-virtual/jfrog-docker-app:$BUILD_NUMBER  -f Dockerfile --build-arg REGISTRY=$JFROG_PLATFORM/app-docker-virtual --build-arg BASE_TAG=$BUILD_NUMBER
@@ -168,7 +120,7 @@ jfrog rt bp docker-su-115 $BUILD_NUMBER
 #Searching for the base image of my docker build
 ## what base image has been used
 # TODO Check if we can ouput the docker images name + tag
-jfrog rt s --spec="${SCRIPT_DIR}/lab-2/filespec-aql-dependency-search.json" --spec-vars="build-number=$BUILD_NUMBER"
+jfrog rt s --spec="${SCRIPT_DIR}/lab-2/filespec-aql-dependency-search.json" --spec-vars="build-name=docker-su-115;build-number=$BUILD_NUMBER"
 
 ## Promoting the docker build
 # Assign a property 

@@ -44,6 +44,12 @@ localRepositories:
       description: "helm local staging "
       xray:
         enabled: true
+  application-helm-prod-local:
+      type: helm
+      repoLayout: simple-default
+      description: "helm local prod "
+      xray:
+        enabled: true
 remoteRepositories:
   application-docker-remote:
       type: docker
@@ -87,6 +93,7 @@ virtualRepositories:
       type: helm
       repositories:
         - application-helm-dev-local
+        - application-helm-rc-local
         - application-helm-prod-local
         - application-helm-remote
       description: "helm virtual"
