@@ -210,6 +210,8 @@ jfrog rt rbs $APP_ID $APP_VERSION
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_EDGE_SINGAPORE/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_EDGE_OREGON/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml
 
+# Edit $SCRIPT_DIR/distribution/dist-rules.json and specify the edge site name
+
 # Release bundle Distribution
 jfrog rt rbd $APP_ID $APP_VERSION --dist-rules=$SCRIPT_DIR/distribution/dist-rules.json
 
