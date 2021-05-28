@@ -53,7 +53,9 @@ cd $SCRIPT_DIR/back/src
 
 # Configure cli for gradle
 # Todo disable ivy descriptors
-jfrog rt gradlec --use-wrapper=true --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --server-id-deploy=swampup115
+jfrog rt gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --deploy-ivy-desc=false --server-id-deploy=swampup115
+
+jfrog rt gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --server-id-deploy=swampup115
 
 # Changing permissions on the gradle-wrapper
 gradle wrapper --gradle-version 6.8.3 --distribution-type all
@@ -95,6 +97,7 @@ jfrog rt s "app-gradle-virtual/*" --props="stage=staging" --build=gradle-su-115/
 # Updating dockerfile with JFrog Platform URL
 cd $SCRIPT_DIR/back/CI/Docker
 
+# TODO (Windows compliant)
 sed "s/registry/${JFROG_PLATFORM}\/app-docker-virtual/g" jfrog-Dockerfile > Dockerfile
 
 # Reading the docker file and identifying the base image
@@ -105,7 +108,7 @@ sed "s/registry/${JFROG_PLATFORM}\/app-docker-virtual/g" jfrog-Dockerfile > Dock
 jfrog rt dpl ${JFROG_PLATFORM}/app-docker-virtual/bitnami/tomcat:latest app-docker-virtual --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=app
 
 # Download war file dependency
-jfrog rt dl "app-gradle-virtual/*/webservice*.war" --props="stage=staging" --build=gradle-su-115/$BUILD_NUMBER --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=java-app
+jfrog rt dl "app-gradle-virtual/*/webservice*.war" war/ --props="stage=staging" --build=gradle-su-115/$BUILD_NUMBER --build-name=docker-su-115 --build-number=$BUILD_NUMBER --module=java-app --flat=true
 
 # Run docker build
 docker build . -t $JFROG_PLATFORM/app-docker-virtual/jfrog-docker-app:$BUILD_NUMBER  -f Dockerfile --build-arg REGISTRY=$JFROG_PLATFORM/app-docker-virtual --build-arg BASE_TAG=$BUILD_NUMBER
@@ -122,12 +125,9 @@ jfrog rt bp docker-su-115 $BUILD_NUMBER
 # TODO Check if we can ouput the docker images name + tag
 jfrog rt s --spec="${SCRIPT_DIR}/lab-2/filespec-aql-dependency-search.json" --spec-vars="build-name=docker-su-115;build-number=$BUILD_NUMBER"
 
-## Promoting the docker build
-# Assign a property 
-    # maintainer
-    # stage (Prod)
-    # app/version (will be used to attach the right image to the helm build info)
-jfrog rt bpr docker-su-115 $BUILD_NUMBER app-docker-prod-local --status=released --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
+#Promote the docker build to release candidate
+jfrog rt bpr docker-su-115 $BUILD_NUMBER app-docker-rc-local --status="release candidate" --copy=true --props="maintainer=hza;stage=staging;appnmv=$APP_ID/$APP_VERSION"
+
 
 #helm
 # cd into helm chart repo
@@ -153,10 +153,20 @@ jfrog rt u 'docker-app-chart-*.tgz' app-helm-virtual --build-name=helm-su-115 --
 jfrog rt bp helm-su-115 $BUILD_NUMBER
 
 # promoting the helm build 
-jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-prod-local --status=released --copy=true
+jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-rc-local --status="release candidate" --copy=true --props="maintainer=hza;stage=staging;appnmv=$APP_ID/$APP_VERSION"
 
-# tagging the promoted helm chart 
-jfrog rt sp "app-helm-prod-local/*" "maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION" --build=helm-su-115/$BUILD_NUMBER
+## Promoting the docker build
+# Assign a property 
+    # maintainer
+    # stage (Prod)
+    # app/version (will be used to attach the right image to the helm build info)
+jfrog rt bpr docker-su-115 $BUILD_NUMBER app-docker-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
+
+#Test run and promote ?
+jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
+
+# promoting the helm build 
+jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
 
 #Security
 # Trigger an Xray scan of your docker build
@@ -207,13 +217,15 @@ jfrog rt rbs $APP_ID $APP_VERSION
 
 #need to create target repositories for distribution on edge
 #create all with yaml configuration file
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_EDGE_SINGAPORE/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_EDGE_OREGON/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PATCH https://$JFROG_EDGE/artifactory/api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml
 
 # Edit $SCRIPT_DIR/distribution/dist-rules.json and specify the edge site name
 
 # Release bundle Distribution
 jfrog rt rbd $APP_ID $APP_VERSION --dist-rules=$SCRIPT_DIR/distribution/dist-rules.json
 
+# Release bundle Distribution relying on a site pattern
+jfrog rt rbd $APP_ID $APP_VERSION --site="*edge*"
+
 # How can we track the progress?
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X GET https://$JFROG_PLATFORM/distribution/api/v1/release_bundle/$APP_ID/$APP_VERSION/distribution | json_pp -json_opt pretty,canonical
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X GET https://$JFROG_PLATFORM/distribution/api/v1/release_bundle/$APP_ID/$APP_VERSION/distribution | jq
