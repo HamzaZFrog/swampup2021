@@ -10,9 +10,6 @@
 # load environment variables
 source .env
 
-# Instanciate token
-export token="Put your token here"
-
 ################################################################################################################
 ## LAB 1 - Repository and project provisioning
 ################################################################################################################
