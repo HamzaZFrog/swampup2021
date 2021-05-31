@@ -1,17 +1,26 @@
 localRepositories:
   app-gradle-prod-local:
       type: gradle
+      repoLayout: maven-2-default
       description: "production deployment"
       xray:
         enabled: true
   app-gradle-rc-local:
       type: gradle
+      repoLayout: maven-2-default
       description: "staging build"
       xray:
         enabled: true
   app-gradle-dev-local:
       type: gradle
+      repoLayout: maven-2-default
       description: "dev build"
+      xray:
+        enabled: true
+  app-gradle-extdep-local:
+      type: gradle
+      repoLayout: maven-2-default
+      description: "external dependencies"
       xray:
         enabled: true
   app-docker-dev-local:
@@ -20,16 +29,22 @@ localRepositories:
       description: "docker development repo"
       xray:
         enabled: true
+  app-docker-rc-local:
+      type: docker
+      repoLayout: simple-default
+      description: "staging deployment"
+      xray:
+        enabled: true
   app-docker-prod-local:
       type: docker
       repoLayout: simple-default
       description: "production deployment"
       xray:
         enabled: true
-  app-docker-rc-local:
+  app-docker-baseimages-local:
       type: docker
       repoLayout: simple-default
-      description: "staging deployment"
+      description: "approved base images"
       xray:
         enabled: true
   app-helm-dev-local:
@@ -60,6 +75,7 @@ remoteRepositories:
       enableTokenAuthentication: true
   app-gradle-remote:
       type: gradle
+      repoLayout: maven-2-default
       url: https://jcenter.bintray.com
       repoLayout: maven-2-default
       xray:
@@ -70,9 +86,16 @@ remoteRepositories:
       repoLayout: simple-default
       xray:
         enabled: true
+  extractors:
+      type: generic
+      url: https://oss.jfrog.org/artifactory/oss-release-local
+      repoLayout: maven-2-default
+      xray:
+        enabled: false
 virtualRepositories:
   app-gradle-virtual:
       type: gradle
+      repoLayout: maven-2-default
       repositories:
         - app-gradle-dev-local
         - app-gradle-rc-local
@@ -83,10 +106,11 @@ virtualRepositories:
   app-docker-virtual:
       type: docker
       repositories:
-        - app-docker-remote
         - app-docker-dev-local
         - app-docker-rc-local
         - app-docker-prod-local
+        - app-docker-baseimages-local
+        - app-docker-remote
       description: "docker virtual"
       defaultDeploymentRepo: app-docker-dev-local
   app-helm-virtual:
