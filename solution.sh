@@ -7,17 +7,19 @@
 #Prepare your local environment
 ###############################################
 
-# load environment variables
+# Update /usr/local/.env
+
+# Load environment variables
 source .env
 
 ################################################################################################################
 ## LAB 1 - Repository and project provisioning
 ################################################################################################################
 
-# Configure CLI main JPD
+# Configure CLI in the main JPD
 jfrog config add swampup115 --artifactory-url=https://$JFROG_PLATFORM/artifactory --dist-url=https://$JFROG_PLATFORM/distribution --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
-# Configure CLI main JPD
+# Configure CLI in the Artifactory Edge
 jfrog config add swampup115-edge --artifactory-url=https://$JFROG_EDGE/artifactory --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
 # Check existing configuration
@@ -41,8 +43,7 @@ jfrog rt ptc $SCRIPT_DIR/lab-1/dev-permission-target-template.json --vars="appli
 jfrog rt ptc $SCRIPT_DIR/lab-1/prod-permission-target-template.json --vars="application=app"
 
 # How to update a permission?
-jfrog rt ptu $SCRIPT_DIR/lab-1/prod-permission-target-template.json --vars="application=app"
-jfrog rt ptu $SCRIPT_DIR/lab-1/prod-permission-target-template.json --vars="application=app"
+jfrog rt ptu $SCRIPT_DIR/lab-1/dev-permission-target-template.json --vars="application=app"
 
 # Create project
 curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' https://$JFROG_PLATFORM/access/api/v1/projects -T ./lab-1/su115-project.json
@@ -86,10 +87,7 @@ jfrog rt bp gradle-su-115 $BUILD_NUMBER
 # Searching build artifacts
 jfrog rt s "app-gradle-virtual/" --build=gradle-su-115/$BUILD_NUMBER
 
-# Find the build artifacts from the latest build
-jfrog rt s "app-gradle-virtual/" --build=gradle-su-115
-
-# tagging the build with properties
+# Tagging the build with properties
 jfrog rt sp "app-gradle-virtual/*" "maintainer=hza;stage=dev;appnmv=$APP_ID/$APP_VERSION" --build=gradle-su-115/$BUILD_NUMBER
 
 # Find the webservice.war from the latest build (using filespec)
@@ -167,19 +165,13 @@ jfrog rt bp helm-su-115 $BUILD_NUMBER
 jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-rc-local --status="release candidate" --copy=true --props="maintainer=hza;stage=staging;appnmv=$APP_ID/$APP_VERSION"
 
 ## Promoting the docker build
-# Assign a property 
-    # maintainer
-    # stage (Prod)
-    # app/version (will be used to attach the right image to the helm build info)
 jfrog rt bpr docker-su-115 $BUILD_NUMBER app-docker-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
-
-# Promoting the base image
-
-#Test run and promote ?
-jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
 
 # promoting the helm build 
 jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
+
+# Promoting the gradle build
+jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
 
 #Security
 # Trigger an Xray scan of your docker build
