@@ -4,6 +4,7 @@ pipelines:
       environmentVariables:
         readOnly:
           application_id : my-hza-app-{{gitBranch}}
+          JFROG_CLI_EXTRACTORS_REMOTE : ArtifactoryUnified/extractors
     steps:
       - name: conf_init
         type: Bash
@@ -172,6 +173,7 @@ pipelines:
              - sed -i "s#BACK_DOCKER_TAG#${back_docker_tag}#g" values.yaml
              - cat Chart.yaml
              - cat values.yaml
+
 
       - name: suv_115_deploy_helm_chart_sit
         type: Bash
