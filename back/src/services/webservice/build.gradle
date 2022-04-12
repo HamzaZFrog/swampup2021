@@ -1,11 +1,5 @@
 apply plugin: 'war'
 
-//repositories {
-//    maven {
-//        url "http://35.197.85.1/artifactory/app-gradle-virtual"
-//        allowInsecureProtocol = true
-//    }
-//}
 
 dependencies {
     //implementation project(':shared'), 'org.apache.commons:commons-collections4:4.4', 'commons-io:commons-io:2.11.0', 'org.apache.commons:commons-lang3:3.12.0'

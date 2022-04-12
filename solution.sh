@@ -20,7 +20,7 @@ source .env
 jfrog config add swampup115 --artifactory-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/artifactory --distribution-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/distribution --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
 # Configure CLI in the Artifactory Edge
-#jfrog config add swampup115-edge --artifactory-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_EDGE/artifactory --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
+jfrog config add swampup115-edge --artifactory-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_EDGE/artifactory --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
 # Check existing configuration
 jfrog  c show
@@ -32,7 +32,7 @@ jfrog config use swampup115
 jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-main.yaml
 
 # Create all repositories in the Artifactory Edge Node
-#jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml --server-id swampup115-edge
+jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml --server-id swampup115-edge
 
 # Create two groups (dev, release managers)
 jfrog rt curl -XPUT /api/security/groups/dev-group -T $SCRIPT_DIR/lab-1/dev-group.json
@@ -53,7 +53,7 @@ $SCRIPT_DIR/lab-1/sharing-repositories.sh
 
 # How to define now the permission scheme within the project?
 # 1) Updating global roles
-# This operation is only available in the UI for now $JFROG_PLATFORM_HTTP_PROTOCOL://jira.jfrog.org/browse/RTMID-26881
+# This operation is only available in the UI for now https://jira.jfrog.org/browse/RTMID-26881
 
 # 2) Creating custom roles
 curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects/su115/roles -T ./lab-1/infosec-role-create.json
@@ -264,5 +264,3 @@ jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-d
 # we are deleting the project last because  repo "app-gradle-rc-local" was assigned to the project and so if we
 # delete the project first it will fail with "message" : "project containing resources can't be removed"
 curl -XDELETE -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects/su115
-
-
