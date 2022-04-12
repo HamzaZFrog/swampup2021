@@ -17,13 +17,13 @@ source .env
 ################################################################################################################
 
 # Configure CLI in the main JPD
-jfrog config add swampup115 --artifactory-url=https://$JFROG_PLATFORM/artifactory --dist-url=https://$JFROG_PLATFORM/distribution --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
+jfrog config add swampup115 --artifactory-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/artifactory --distribution-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/distribution --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
 # Configure CLI in the Artifactory Edge
-jfrog config add swampup115-edge --artifactory-url=https://$JFROG_EDGE/artifactory --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
+#jfrog config add swampup115-edge --artifactory-url=$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_EDGE/artifactory --user=$ADMIN_USER --password=$ADMIN_PASSWORD --interactive=false
 
 # Check existing configuration
-jfrog rt c show
+jfrog  c show
 
 # Make it default
 jfrog config use swampup115
@@ -32,7 +32,7 @@ jfrog config use swampup115
 jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-main.yaml
 
 # Create all repositories in the Artifactory Edge Node
-jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml --server-id swampup115-edge
+#jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-creation-edge.yaml --server-id swampup115-edge
 
 # Create two groups (dev, release managers)
 jfrog rt curl -XPUT /api/security/groups/dev-group -T $SCRIPT_DIR/lab-1/dev-group.json
@@ -46,23 +46,27 @@ jfrog rt ptc $SCRIPT_DIR/lab-1/prod-permission-target-template.json --vars="appl
 jfrog rt ptu $SCRIPT_DIR/lab-1/dev-permission-target-template.json --vars="application=app"
 
 # Create project
-curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' https://$JFROG_PLATFORM/access/api/v1/projects -T ./lab-1/su115-project.json
+curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects -T ./lab-1/su115-project.json
 
 # Sharing repositories in a project
 $SCRIPT_DIR/lab-1/sharing-repositories.sh
 
 # How to define now the permission scheme within the project?
 # 1) Updating global roles
-# This operation is only available in the UI for now
+# This operation is only available in the UI for now $JFROG_PLATFORM_HTTP_PROTOCOL://jira.jfrog.org/browse/RTMID-26881
 
 # 2) Creating custom roles
-curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' https://$JFROG_PLATFORM/access/api/v1/projects/su115/roles -T ./lab-1/infosec-role-create.json
+curl -XPOST -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects/su115/roles -T ./lab-1/infosec-role-create.json
 
-# 3) Tagging repositories (Dev , PROD)
+# 3) Tagging repositories (Dev , PROD) . Note: This  works ( as designed) only for  repos that are  "assigned"  to a project and not just  "shared" to a project   as per RTMID-26042 .
+# Also JFUI-9520 is reproducible in RT v 7.34.4
+# As per PTRENG-3192 use the "Move Repository in a Project" API to first assign the repo to the project.
+curl --location --request PUT  "$JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects/_/attach/repositories/app-gradle-rc-local/su115?force=true" -H "Authorization: Bearer ${token}"
+# Now tag the repo to DEV , PROD environments
 jfrog rt curl -XPOST /api/repositories/app-gradle-rc-local -H "content-type: application/vnd.org.jfrog.artifactory.repositories.LocalRepositoryConfiguration+json" --data '{"environments":["DEV", "PROD"]}'
 
 # Adding builds to the Xray indexing process
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/binMgr/builds -T $SCRIPT_DIR/lab-3/indexed-builds.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/binMgr/builds -T $SCRIPT_DIR/lab-3/indexed-builds.json
 
 ################################################################################################################
 ## LAB 2 - JFROG CLI Build integration
@@ -73,13 +77,13 @@ cd $SCRIPT_DIR/back/src
 
 # Configure cli for gradle
 # Todo disable ivy descriptors
-jfrog rt gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --deploy-ivy-desc=false --deploy-maven-desc=true --server-id-deploy=swampup115
+jfrog  gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --deploy-ivy-desc=false --deploy-maven-desc=true --server-id-deploy=swampup115
 
 # Local proxy for our build info extractor (for both Maven and Gradle)
 export JFROG_CLI_EXTRACTORS_REMOTE=swampup115/extractors
 
 # Gradle Build Run
-jfrog rt gradle "clean artifactoryPublish -b build.gradle --info --refresh-dependencies" --build-name=gradle-su-115 --build-number=$BUILD_NUMBER
+jfrog  gradle "clean artifactoryPublish -b build.gradle --info --refresh-dependencies" --build-name=gradle-su-115 --build-number=$BUILD_NUMBER
 
 # Publishing Build info
 jfrog rt bp gradle-su-115 $BUILD_NUMBER
@@ -146,6 +150,7 @@ cd $SCRIPT_DIR/docker-app-chart
 sed -ie 's/0.1.1/0.1.'"$BUILD_NUMBER"'/' ./Chart.yaml
 sed -ie 's/latest/'"$BUILD_NUMBER"'/g' ./values.yaml
 
+# build-collect-env i.e bce - Collect environment variables. Environment variables can be excluded using the build-publish command
 jfrog rt bce helm-su-115 $BUILD_NUMBER
 
 # Reference the docker image as helm build dependency
@@ -178,14 +183,15 @@ jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-prod-local --status=released
 jfrog rt bs docker-su-115 $BUILD_NUMBER
 
 
+
 ################################################################################################################
 ## LAB 3 - Xray DevSecOps
 ################################################################################################################
 
 # it's the right time to create your security policies and watches
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/lab-3/security-policy.json
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/lab-3/license-policy.json
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  https://$JFROG_PLATFORM/xray/api/v2/watches -T $SCRIPT_DIR/lab-3/watch.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/lab-3/security-policy.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/lab-3/license-policy.json
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v2/watches -T $SCRIPT_DIR/lab-3/watch.json
 
 # Let's run the build scan again
 jfrog rt bs docker-su-115 $BUILD_NUMBER
@@ -202,20 +208,61 @@ jfrog rt bs docker-su-115 $BUILD_NUMBER --fail=false
 jfrog rt s --spec=$SCRIPT_DIR/lab-4/rb-spec-prop-prom-based.json --spec-vars="app-id=$APP_ID;app-version=$APP_VERSION"
 
 # Release bundle creation
-jfrog rt rbc $APP_ID $APP_VERSION --spec=$SCRIPT_DIR/lab-4/rb-spec-prop-prom-based.json --spec-vars="app-id=$APP_ID;app-version=$APP_VERSION"
+jfrog ds rbc $APP_ID $APP_VERSION --spec=$SCRIPT_DIR/lab-4/rb-spec-prop-prom-based.json --spec-vars="app-id=$APP_ID;app-version=$APP_VERSION"
 
 # Release bundle signing 
-jfrog rt rbs $APP_ID $APP_VERSION
+jfrog ds rbs $APP_ID $APP_VERSION
 
 # Add release bundle to Xray indexing (via UI)
 
 # Add release bundle to Project (via UI)
 
 # Release bundle Distribution
-jfrog rt rbd $APP_ID $APP_VERSION --dist-rules=$SCRIPT_DIR/lab-4/dist-rules.json
+jfrog ds rbd $APP_ID $APP_VERSION --dist-rules=$SCRIPT_DIR/lab-4/dist-rules.json
 
 # Release bundle Distribution relying on a site pattern
-jfrog rt rbd $APP_ID $APP_VERSION --site="*edge*"
+jfrog ds rbd $APP_ID $APP_VERSION --site="*edge*"
 
 # How can we track the progress?
-curl -u$ADMIN_USER:$ADMIN_PASSWORD -X GET https://$JFROG_PLATFORM/distribution/api/v1/release_bundle/$APP_ID/$APP_VERSION/distribution | jq
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X GET $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/distribution/api/v1/release_bundle/$APP_ID/$APP_VERSION/distribution | jq
+
+################################################################################################################
+## Cleanup after LAB 4
+################################################################################################################
+# Stop a release bundle version distribution to Artifactory Edge nodes.
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X PUT "http://$JFROG_PLATFORM:8082/distribution/api/v1/distribution/$APP_ID/$APP_VERSION/abort"
+
+# Deletes all versions of a release bundle on JFrog Distribution only
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE "http:///$JFROG_PLATFORM:8082/distribution/api/v1/release_bundle/$APP_ID"
+# or
+#Delete the release bundle with name myApp and version 1.0.0 from the Edge Nodes, according to the definition in the distribution rules file. The release bundle will also be deleted from the Distribution service itself.
+jf ds rbdel --delete-from-dist --dist-rules=$SCRIPT_DIR/lab-4/dist-rules.json $APP_ID $APP_VERSION
+
+# delete your security policies and watches
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v2/watches/su-115-xray-watch
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/policies/gpl-blacklisting
+curl -u$ADMIN_USER:$ADMIN_PASSWORD -X DELETE $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/policies/highRisk
+
+# Delete the Builds
+jfrog rt bdi gradle-su-115
+jfrog rt bdi docker-su-115
+jfrog rt bdi helm-su-115
+
+# Delete permission targets Dev and Prod
+jfrog rt curl -XDELETE /api/security/permissions/app-dev-permission-target
+jfrog rt curl -XDELETE /api/security/permissions/app-prod-permission-target
+
+# Delete the  two groups (dev, release managers)
+jfrog rt curl -XDELETE /api/security/groups/dev-group
+jfrog rt curl -XDELETE /api/security/groups/release-managers-group
+
+# Delete  all repositories in the main Artifactory JPD . You will get the output as "18 changes to config merged successfully".
+# Logout and logback into the UI to see those 18 "app-*" repos deleted.
+jfrog rt curl -XPATCH /api/system/configuration -T $SCRIPT_DIR/lab-1/repo-conf-deletion-main.yaml
+
+# Delete project ( no jfrog cli command yet)
+# we are deleting the project last because  repo "app-gradle-rc-local" was assigned to the project and so if we
+# delete the project first it will fail with "message" : "project containing resources can't be removed"
+curl -XDELETE -H "Authorization: Bearer ${token}" -H 'Content-Type:application/json' $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/access/api/v1/projects/su115
+
+

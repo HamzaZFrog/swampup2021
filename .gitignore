@@ -1,0 +1,6 @@
+my.env
+.idea/*scratch.sh
+sivasjpd.env
+.gradle/
+Dockerfile
+war/
