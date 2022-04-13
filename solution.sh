@@ -136,7 +136,9 @@ jfrog rt dp $JFROG_PLATFORM/app-docker-virtual/jfrog-docker-app:$BUILD_NUMBER ap
 jfrog rt bp docker-su-115 $BUILD_NUMBER
 
 #Searching for the base image of my docker build
-## what base image has been used
+## what base image has been used . This can return no result if the "base image" i.e
+# $JFROG_PLATFORM/app-docker-virtual/bitnami/tomcat:latest was already in the docker cache on
+# the  client machine , and so the "docker build" command did not have to pull the it from  $JFROG_PLATFORM
 jfrog rt s --spec="${SCRIPT_DIR}/lab-2/filespec-aql-dependency-search.json" --spec-vars="build-name=docker-su-115;build-number=$BUILD_NUMBER"
 
 #Promote the docker build to release candidate
@@ -179,7 +181,7 @@ jfrog rt bpr helm-su-115 $BUILD_NUMBER app-helm-prod-local --status=released --c
 jfrog rt bpr gradle-su-115 $BUILD_NUMBER app-gradle-prod-local --status=released --comment='prod ready aplication' --copy=true --props="maintainer=hza;stage=prod;appnmv=$APP_ID/$APP_VERSION"
 
 #Security
-# Trigger an Xray scan of your docker build
+# Trigger an Xray scan of your docker build . You will get the  "message": "No Xray “Fail build in case of a violation” policy rule has been defined on this build
 jfrog rt bs docker-su-115 $BUILD_NUMBER
 
 
@@ -193,7 +195,7 @@ curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v1/policies -T $SCRIPT_DIR/lab-3/license-policy.json
 curl -u$ADMIN_USER:$ADMIN_PASSWORD -X POST -H "content-type: application/json"  $JFROG_PLATFORM_HTTP_PROTOCOL://$JFROG_PLATFORM/xray/api/v2/watches -T $SCRIPT_DIR/lab-3/watch.json
 
-# Let's run the build scan again
+# Let's run the build scan again - You should,get "message": "Build docker-su-115 number 1 was scanned by Xray and passed with no Alerts"
 jfrog rt bs docker-su-115 $BUILD_NUMBER
 
 # Let's run it once again without enforcement
