@@ -80,7 +80,7 @@ cd $SCRIPT_DIR/back/src
 jfrog  gradlec --repo-resolve=app-gradle-virtual --server-id-resolve=swampup115 --repo-deploy=app-gradle-virtual --deploy-ivy-desc=false --deploy-maven-desc=true --server-id-deploy=swampup115
 
 # Local proxy for our build info extractor (for both Maven and Gradle)
-export JFROG_CLI_EXTRACTORS_REMOTE=swampup115/extractors
+export JFROG_CLI_EXTRACTORS_REMOTE=swampup115/app-extractors
 
 # Gradle Build Run
 jfrog  gradle "clean artifactoryPublish -b build.gradle --info --refresh-dependencies" --build-name=gradle-su-115 --build-number=$BUILD_NUMBER
