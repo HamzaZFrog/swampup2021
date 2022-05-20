@@ -86,7 +86,7 @@ remoteRepositories:
       repoLayout: simple-default
       xray:
         enabled: true
-  extractors:
+  app-extractors:
       type: generic
       url: https://oss.jfrog.org/artifactory/oss-release-local
       repoLayout: maven-2-default

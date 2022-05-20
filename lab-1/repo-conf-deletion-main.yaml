@@ -1,0 +1,22 @@
+localRepositories:
+  app-gradle-prod-local: null
+  app-gradle-rc-local: null
+  app-gradle-dev-local: null
+  app-gradle-extdep-local: null
+  app-docker-dev-local: null
+  app-docker-rc-local: null
+  app-docker-prod-local: null
+  app-docker-baseimages-local: null
+  app-helm-dev-local: null
+  app-helm-rc-local: null
+  app-helm-prod-local: null
+remoteRepositories:
+  app-docker-remote: null
+  app-gradle-remote: null
+  app-helm-remote: null
+  app-extractors: null
+virtualRepositories:
+  app-gradle-virtual: null
+  app-docker-virtual: null
+  app-helm-virtual: null
+
