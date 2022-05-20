@@ -4,7 +4,7 @@ pipelines:
       environmentVariables:
         readOnly:
           application_id : my-hza-app-{{gitBranch}}
-          JFROG_CLI_EXTRACTORS_REMOTE : ArtifactoryUnified/extractors
+          JFROG_CLI_EXTRACTORS_REMOTE : ArtifactoryUnified/app-extractors
     steps:
       - name: conf_init
         type: Bash
