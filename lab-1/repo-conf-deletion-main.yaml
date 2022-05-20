@@ -14,7 +14,7 @@ remoteRepositories:
   app-docker-remote: null
   app-gradle-remote: null
   app-helm-remote: null
-  extractors: null
+  app-extractors: null
 virtualRepositories:
   app-gradle-virtual: null
   app-docker-virtual: null
